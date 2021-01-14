@@ -14,16 +14,24 @@ class Auth implements BaseAuth {
   @override
   Future<String> createUserWithEmailAndPassword(
       String email, String password) async {
-    User user = (await auth.createUserWithEmailAndPassword(
-            email: email, password: password))
-        .user;
-    return user.uid;
+    try {
+      User user = (await auth.createUserWithEmailAndPassword(
+              email: email, password: password))
+          .user;
+      return user.uid;
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   Future<String> currentUser() async {
-    User user = await auth.currentUser;
-    return user.uid;
+    try {
+      User user = await auth.currentUser;
+      return user.uid;
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override

@@ -17,18 +17,26 @@ class UserService implements BaseAuth {
 
   @override
   Future<void> saveUsers(data) {
-    FirebaseFirestore.instance.collection("users").add(data);
+    try {
+      FirebaseFirestore.instance.collection("users").add(data);
+    } catch (e) {
+      print(e);
+    }
   }
 
   @override
   Future getUser(String uid) async {
-    return await FirebaseFirestore.instance
-        .collection("users")
-        .where("uid", isEqualTo: uid)
-        .get()
-        .catchError((e) {
+    try {
+      return await FirebaseFirestore.instance
+          .collection("users")
+          .where("uid", isEqualTo: uid)
+          .get()
+          .catchError((e) {
+        print(e);
+      });
+    } catch (e) {
       print(e);
-    });
+    }
   }
 
   @override
@@ -69,6 +77,7 @@ class UserService implements BaseAuth {
       return await FirebaseFirestore.instance
           .collection("locations")
           .where("route", isEqualTo: route)
+          .where("status", isEqualTo: true)
           .snapshots();
     } catch (e) {}
   }

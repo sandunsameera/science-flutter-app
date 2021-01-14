@@ -1,5 +1,6 @@
 import 'package:bus_tracker/screens/map_screen.dart';
 import 'package:bus_tracker/screens/profile_screen.dart';
+import 'package:bus_tracker/screens/schedule_screen.dart';
 import 'package:bus_tracker/screens/time_table.dart';
 import 'package:circular_bottom_navigation/circular_bottom_navigation.dart';
 import 'package:circular_bottom_navigation/tab_item.dart';
@@ -11,7 +12,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int selectedPos = 0;
+  int selectedPos = 1;
 
   double bottomNavBarHeight = 60;
 
@@ -22,7 +23,7 @@ class _HomeScreenState extends State<HomeScreen> {
     new TabItem(Icons.map, "Map", Colors.orange,
         labelStyle:
             TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-    new TabItem(Icons.map, "Time Table", Colors.green,
+    new TabItem(Icons.schedule, "Schedule", Colors.green,
         labelStyle:
             TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
   ]);
@@ -61,7 +62,7 @@ class _HomeScreenState extends State<HomeScreen> {
         break;
 
       case 2:
-        slogan = TimeTable();
+        slogan = ScheduleScreen();
         break;
     }
 

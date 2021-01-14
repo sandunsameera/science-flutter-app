@@ -7,6 +7,7 @@ import 'package:bus_tracker/widgets/text_form_field.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -22,8 +23,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Auth _auth = new Auth();
   UserService _userService = new UserService();
   QuerySnapshot user;
+  final storage = new FlutterSecureStorage();
 
-  Future<void> login() async {
+  Future login() async {
     try {
       (await FirebaseAuth.instance.signInWithEmailAndPassword(
               email: _email.text, password: _password.text))
@@ -68,15 +70,19 @@ class _LoginScreenState extends State<LoginScreen> {
           color: Colors.purple[900],
           onPressed: () {
             if (_formKey.currentState.validate()) {
-              login().then((value) {
+              login().then((value) async {
+                await storage.write(key: "token", value: "xxyyzz");
                 _userService
                     .getUser(FirebaseAuth.instance.currentUser.uid)
-                    .then((value) {
+                    .then((value) async{
                   user = value;
+
                   if (user.docs[0].data()['type'] == "user") {
+                    await storage.write(key: "user", value: "user");
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => HomeScreen()));
                   } else {
+                    await storage.write(key: "user", value: "bus");
                     Navigator.push(
                         context,
                         MaterialPageRoute(

@@ -13,6 +13,7 @@ class LabelTextField extends StatelessWidget {
   final Function onTap;
   final IconButton iconButton;
   final Icon icon;
+  final bool isreadonly;
   LabelTextField({
     this.hintText,
     this.isObscure = false,
@@ -26,7 +27,7 @@ class LabelTextField extends StatelessWidget {
     this.icon,
     this.onTap,
     this.iconButton,
-    
+    this.isreadonly = false,
   });
 
   @override
@@ -34,17 +35,16 @@ class LabelTextField extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(8),
       child: TextFormField(
+        readOnly: isreadonly,
         decoration: new InputDecoration(
-          hintText: hintText,
-          labelText: labelText,
-          filled: true,
-          fillColor: Color(0xffeaeeef),
-          border: InputBorder.none,
-          icon: icon,
-          // alignLabelWithHint: true,
-          hoverColor: Colors.indigo
-          
-        ),
+            hintText: hintText,
+            labelText: labelText,
+            filled: true,
+            fillColor: Color(0xffeaeeef),
+            border: InputBorder.none,
+            icon: icon,
+            // alignLabelWithHint: true,
+            hoverColor: Colors.indigo),
         controller: textEditingController,
         textCapitalization: textCapitalization,
         keyboardType: keyboardType,
