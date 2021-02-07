@@ -6,7 +6,7 @@ abstract class BaseAuth {
   Future<void> saveUserLocation(id, data);
   Future getBuses();
   Future getBusById(id);
-  Future getByRoute(route);
+  Future getByRoute(route, start);
   Future getByActive(isactive);
   Future updateUser(id, data);
 }
@@ -72,12 +72,13 @@ class UserService implements BaseAuth {
   }
 
   @override
-  Future getByRoute(route) async {
+  Future getByRoute(route, start) async {
     try {
       return await FirebaseFirestore.instance
           .collection("locations")
           .where("route", isEqualTo: route)
           .where("status", isEqualTo: true)
+          .where("active dest".toLowerCase(), isEqualTo: start)
           .snapshots();
     } catch (e) {}
   }

@@ -21,6 +21,8 @@ class _ShareLocationState extends State<ShareLocation> {
   double lo;
   QuerySnapshot user;
   Map<String, dynamic> userdata;
+  List<String> destinations = [];
+  String _dropDownValue;
 
   void _saveUserLocation(double lat, double long) async {
     String uid = FirebaseAuth.instance.currentUser.uid;
@@ -28,6 +30,8 @@ class _ShareLocationState extends State<ShareLocation> {
       setState(() {
         user = value;
         userdata = user.docs[0].data();
+        destinations.add(userdata['dest1']);
+        destinations.add(userdata['dest2']);
       });
     });
     Map<String, dynamic> data = {
@@ -38,6 +42,7 @@ class _ShareLocationState extends State<ShareLocation> {
       "route": userdata['route'],
       "name": userdata['name'],
       'number': userdata['number'],
+      'active dest': _dropDownValue != null ? _dropDownValue.toLowerCase() : "",
     };
     _userService.saveUserLocation(uid, data);
   }
@@ -65,6 +70,7 @@ class _ShareLocationState extends State<ShareLocation> {
 
   @override
   void initState() {
+    destinations.clear();
     timer = Timer.periodic(Duration(seconds: 15), (Timer t) {
       print("triggerd");
       _getCurrentLocation().whenComplete(() {
@@ -76,10 +82,10 @@ class _ShareLocationState extends State<ShareLocation> {
   }
 
   @override
-void dispose() {
-  timer?.cancel();
-  super.dispose();
-}
+  void dispose() {
+    timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -93,6 +99,39 @@ void dispose() {
       children: <Widget>[
         SizedBox(height: 32),
         _avilabilityRow(),
+        destinations.length > 0
+            ? Container(
+                padding: EdgeInsets.only(left: 32, right: 32),
+                width: MediaQuery.of(context).size.width,
+                child: DropdownButton(
+                  hint: _dropDownValue == null
+                      ? Text('End Destination')
+                      : Text(
+                          _dropDownValue,
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                  isExpanded: true,
+                  iconSize: 30.0,
+                  style: TextStyle(color: Colors.blue),
+                  items: destinations.map(
+                    (val) {
+                      return DropdownMenuItem<String>(
+                        value: val,
+                        child: Text(val),
+                      );
+                    },
+                  ).toList(),
+                  onChanged: (val) {
+                    setState(
+                      () {
+                        _dropDownValue = val;
+                        // isRouteSearch ? readDataforTimeTable() : null;
+                      },
+                    );
+                  },
+                ),
+              )
+            : SizedBox(),
         Spacer(),
         _shareText(),
         Spacer(),
@@ -147,11 +186,14 @@ void dispose() {
                   "Start journey",
                   style: TextStyle(color: Colors.white),
                 ),
-                onPressed: () {
-                  _getCurrentLocation().whenComplete(() {
-                    _saveUserLocation(la, lo);
-                  });
-                },
+                onPressed: _dropDownValue != null
+                    ? () {
+                        print("dsnj");
+                        _getCurrentLocation().whenComplete(() {
+                          _saveUserLocation(la, lo);
+                        });
+                      }
+                    : null,
               )
             : RaisedButton(
                 shape: RoundedRectangleBorder(

@@ -96,6 +96,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Spacer(),
         _image != null ? _updateImage() : SizedBox(),
         SizedBox(height: 32),
+        _signOut(),
+        Spacer(),
       ],
     );
   }
@@ -213,7 +215,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 SizedBox(height: 32),
-             userdata!=null&&  userdata['type'] != null &&  userdata['type'] == "bus owner"
+                userdata != null &&
+                        userdata['type'] != null &&
+                        userdata['type'] == "bus owner"
                     ? Padding(
                         padding: EdgeInsets.only(left: 16, right: 16),
                         child: Row(
@@ -228,7 +232,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       )
                     : SizedBox(),
                 SizedBox(height: 32),
-               userdata!=null&& userdata['type'] != null && userdata['type'] == "bus owner"
+                userdata != null &&
+                        userdata['type'] != null &&
+                        userdata['type'] == "bus owner"
                     ? Padding(
                         padding: EdgeInsets.only(left: 16, right: 16),
                         child: Row(
@@ -265,6 +271,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
         },
         child: Text("Update profile picture",
             style: TextStyle(color: Colors.white)),
+      ),
+    );
+  }
+
+  Widget _signOut() {
+    return Container(
+      padding: EdgeInsets.only(left: 32, right: 32),
+      width: MediaQuery.of(context).size.width,
+      child: RaisedButton(
+        color: Colors.teal,
+        onPressed: () {
+          FirebaseAuth.instance.signOut();
+        },
+        child: Text(
+          "Sign Out",
+          style: TextStyle(color: Colors.white),
+        ),
       ),
     );
   }

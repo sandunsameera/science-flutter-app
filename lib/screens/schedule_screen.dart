@@ -1,7 +1,9 @@
 import 'package:bus_tracker/models/time_table.dart';
+import 'package:bus_tracker/screens/reserve_sheet.dart';
 import 'package:bus_tracker/widgets/text_form_field.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 
 class ScheduleScreen extends StatefulWidget {
   @override
@@ -15,14 +17,33 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   final databaseReference = FirebaseDatabase.instance.reference();
   List<Timetable> timetableList = [];
   List<String> destinations = [];
+  List<String> startpositions = [];
   bool isRouteSearch = false;
   bool isAllSearched = false;
+  double la;
+  double lo;
+
+  Future<void> _getCurrentLocation() async {
+    final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high);
+    if (mounted) {
+      setState(() {
+        try {
+          la = position.latitude;
+          lo = position.longitude;
+        } catch (e) {
+          print(e);
+        }
+      });
+    }
+  }
 
   void readDataforRoute() {
     databaseReference.child('route').once().then((DataSnapshot snapshot) {
       var keys = snapshot.value.keys;
       var value = snapshot.value;
       destinations.clear();
+      startpositions.clear();
 
       for (var key in keys) {
         print(value[key]['destination1Ob']['stationName']);
@@ -32,6 +53,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
           setState(() {
             destinations.add(value[key]['destination1Ob']['stationName']);
             destinations.add(value[key]['destination2Ob']['stationName']);
+            startpositions.add(value[key]['destination1Ob']['stationName']);
+            startpositions.add(value[key]['destination2Ob']['stationName']);
           });
           print(destinations.length);
         }
@@ -70,6 +93,7 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   void initState() {
     super.initState();
     readDataforRoute();
+    this._getCurrentLocation();
   }
 
   @override
@@ -81,15 +105,15 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
   }
 
   Widget _body() {
-    return Container(
-      child: Column(
-        children: [
-          SizedBox(height: 40),
-          _searchBar(),
-          SizedBox(height: 40),
-          _tableList()
-        ],
-      ),
+    return Column(
+      children: [
+        SizedBox(height: 40),
+        _searchBar(),
+        SizedBox(height: 40),
+        Expanded(
+          child: _tableList(),
+        )
+      ],
     );
   }
 
@@ -137,6 +161,36 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
               },
             ),
           ),
+          // Container(
+          //   width: MediaQuery.of(context).size.width,
+          //   child: DropdownButton(
+          //     hint: _dropDownValue == null
+          //         ? Text('Destination')
+          //         : Text(
+          //             _dropDownValue,
+          //             style: TextStyle(color: Colors.blue),
+          //           ),
+          //     isExpanded: true,
+          //     iconSize: 30.0,
+          //     style: TextStyle(color: Colors.blue),
+          //     items: destinations.map(
+          //       (val) {
+          //         return DropdownMenuItem<String>(
+          //           value: val,
+          //           child: Text(val),
+          //         );
+          //       },
+          //     ).toList(),
+          //     onChanged: (val) {
+          //       setState(
+          //         () {
+          //           _dropDownValue = val;
+          //           isRouteSearch ? readDataforTimeTable() : null;
+          //         },
+          //       );
+          //     },
+          //   ),
+          // ),
           Container(
             child: !isRouteSearch
                 ? _searchButtonForRoute()
@@ -196,37 +250,47 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
 
   Widget _tableList() {
     return ListView.builder(
+        scrollDirection: Axis.vertical,
         shrinkWrap: true,
         itemCount: timetableList.length,
         itemBuilder: (context, int index) {
-          return Column(
-            children: [
-              SizedBox(height: 10),
-              Container(
-                padding: EdgeInsets.only(left: 16, right: 16),
-                child: Card(
-                  child: Container(
-                    child: Column(
-                      children: [
-                        ListTile(
-                          leading: Text("Start Station:"),
-                          trailing: Text(
-                            _dropDownValue,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        SizedBox(height: 16),
-                        ListTile(
-                          leading: Text("Depature time:"),
-                          trailing: Text(timetableList[index].depatureTime +
-                              " (In 24 hours time)",style: TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                      ],
+          return Container(
+            padding: EdgeInsets.only(left: 16, right: 16),
+            child: Card(
+                child: InkWell(
+              onTap: () {
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => ReserveSeats(
+                              time: timetableList[index].depatureTime,
+                              la: this.la,
+                              lo: this.lo,
+                              busRoute: _route.text,
+                            )));
+              },
+              child: Container(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: Text("Start Station:"),
+                      trailing: Text(
+                        _dropDownValue,
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 16),
+                    ListTile(
+                      leading: Text("Depature time:"),
+                      trailing: Text(
+                          timetableList[index].depatureTime +
+                              " (In 24 hours time)",
+                          style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            )),
           );
         });
   }

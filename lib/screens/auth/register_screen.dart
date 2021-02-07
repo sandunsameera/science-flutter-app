@@ -21,6 +21,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController _phone = new TextEditingController();
   TextEditingController _route = new TextEditingController();
   TextEditingController _number = new TextEditingController();
+  TextEditingController _dest1 = new TextEditingController();
+  TextEditingController _dest2 = new TextEditingController();
 
   bool type = true;
 
@@ -55,6 +57,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "image": '',
         "type": type == true ? "user" : "bus owner",
         "route": _route.text,
+         'dest1': _dest1.text,
+        'dest2': _dest2.text,
         "number": _number.text,
       };
       type ? saveUserData(data) : saveUserData(databus);
@@ -171,6 +175,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     validator: (v) {
                       if (v.isEmpty) {
                         return 'Number plate is required';
+                      }
+                      return null;
+                    },
+                  )
+                : SizedBox(),
+            SizedBox(height: 32),
+            type == false
+                ? LabelTextField(
+                    keyboardType: TextInputType.text,
+                    hintText: "Destination 1",
+                    textEditingController: _dest1,
+                    validator: (v) {
+                      if (v.isEmpty) {
+                        return 'Destination 1 is required';
+                      }
+                      return null;
+                    },
+                  )
+                : SizedBox(),
+            SizedBox(height: 32),
+            type == false
+                ? LabelTextField(
+                    keyboardType: TextInputType.text,
+                    hintText: "Destinations 2",
+                    textEditingController: _dest2,
+                    validator: (v) {
+                      if (v.isEmpty) {
+                        return 'Destination 2 is required';
                       }
                       return null;
                     },

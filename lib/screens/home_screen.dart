@@ -1,4 +1,5 @@
 import 'package:bus_tracker/screens/map_screen.dart';
+import 'package:bus_tracker/screens/my_reservations.dart';
 import 'package:bus_tracker/screens/profile_screen.dart';
 import 'package:bus_tracker/screens/schedule_screen.dart';
 import 'package:bus_tracker/screens/time_table.dart';
@@ -24,6 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
         labelStyle:
             TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
     new TabItem(Icons.schedule, "Schedule", Colors.green,
+        labelStyle:
+            TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
+    new TabItem(Icons.bus_alert, "My Reservations", Colors.green,
         labelStyle:
             TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
   ]);
@@ -63,6 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
       case 2:
         slogan = ScheduleScreen();
+        break;
+      case 3:
+        slogan = MyReservations();
         break;
     }
 

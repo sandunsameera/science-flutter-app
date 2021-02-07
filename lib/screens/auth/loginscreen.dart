@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bus_tracker/screens/auth/register_screen.dart';
 import 'package:bus_tracker/screens/bus_screens/home_screen.dart';
 import 'package:bus_tracker/screens/home_screen.dart';
@@ -8,6 +10,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:provider/provider.dart';
+import 'package:bus_tracker/services/login_service.dart';
+
+enum authProblems { UserNotFound, PasswordNotValid, NetworkError }
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -27,12 +33,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future login() async {
     try {
-      (await FirebaseAuth.instance.signInWithEmailAndPassword(
-              email: _email.text, password: _password.text))
-          .user;
+      UserCredential userCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: _email.text, password: _password.text);
+      User user = userCredential.user;
+      return user;
     } catch (e) {
       print(e);
-      return null;
     }
   }
 
@@ -71,18 +78,15 @@ class _LoginScreenState extends State<LoginScreen> {
           onPressed: () {
             if (_formKey.currentState.validate()) {
               login().then((value) async {
-                await storage.write(key: "token", value: "xxyyzz");
                 _userService
                     .getUser(FirebaseAuth.instance.currentUser.uid)
-                    .then((value) async{
+                    .then((value) async {
                   user = value;
-
+                }).whenComplete(() {
                   if (user.docs[0].data()['type'] == "user") {
-                    await storage.write(key: "user", value: "user");
                     Navigator.push(context,
                         MaterialPageRoute(builder: (context) => HomeScreen()));
-                  } else {
-                    await storage.write(key: "user", value: "bus");
+                  } else if (user.docs[0].data()['type'] == "bus owner") {
                     Navigator.push(
                         context,
                         MaterialPageRoute(

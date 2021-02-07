@@ -12,6 +12,7 @@ class MapScreen extends StatefulWidget {
 
 class _MapScreenState extends State<MapScreen> {
   TextEditingController _route = new TextEditingController();
+  TextEditingController _start = new TextEditingController();
   UserService _userService = new UserService();
   Stream busses;
   double la;
@@ -151,39 +152,56 @@ class _MapScreenState extends State<MapScreen> {
   }
 
   Widget _searchBar() {
-    return Container(
-      padding: EdgeInsets.only(left: 16, right: 16),
-      child: Row(
-        children: <Widget>[
-          Container(
-            width: MediaQuery.of(context).size.width / 2,
-            child: LabelTextField(
-              textEditingController: _route,
-              hintText: "Bus route",
-              keyboardType: TextInputType.number,
-            ),
-          ),
-          Spacer(),
-          Container(
-            child: RaisedButton(
-              onPressed: () {
-                _route.text != ""
-                    ? _userService.getByRoute(_route.text).then((value) {
-                        setState(() {
-                          busses = value;
-                        });
-                      })
-                    : null;
-              },
-              child: Text(
-                "Search",
-                style: TextStyle(color: Colors.white),
+    return Column(
+      children: [
+        Container(
+          padding: EdgeInsets.only(left: 16, right: 16),
+          child: Row(
+            children: <Widget>[
+              Container(
+                width: MediaQuery.of(context).size.width / 2,
+                child: LabelTextField(
+                  textEditingController: _route,
+                  hintText: "Bus route",
+                  keyboardType: TextInputType.number,
+                ),
               ),
-              color: Colors.purple[900],
+              Spacer(),
+              Container(
+                child: RaisedButton(
+                  onPressed: () {
+                    _route.text != ""
+                        ? _userService
+                            .getByRoute(_route.text, _start.text)
+                            .then((value) {
+                            setState(() {
+                              busses = value;
+                            });
+                          })
+                        : null;
+                  },
+                  child: Text(
+                    "Search",
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  color: Colors.purple[900],
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 16),
+        Container(
+          padding: EdgeInsets.only(left: 16, right: 16),
+          child: Container(
+            width: MediaQuery.of(context).size.width,
+            child: LabelTextField(
+              textEditingController: _start,
+              hintText: "Start",
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
