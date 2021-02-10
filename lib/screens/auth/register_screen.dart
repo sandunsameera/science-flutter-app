@@ -4,8 +4,10 @@ import 'package:bus_tracker/services/auth_service.dart';
 import 'package:bus_tracker/services/user_service.dart';
 import 'package:bus_tracker/widgets/text_form_field.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_switch/flutter_switch.dart';
+import 'package:bus_tracker/models/route.dart';
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -29,9 +31,40 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Auth _auth = new Auth();
   UserService _userService = new UserService();
 
+  final databaseReference = FirebaseDatabase.instance.reference();
+  List<Routerr> route = [];
+  String _dropDownValue;
+  String dest1;
+  String dest2;
+
+  void readDataforReservations() {
+    databaseReference.child('route').once().then((DataSnapshot snapshot) {
+      var keys = snapshot.value.keys;
+      var value = snapshot.value;
+      route.clear();
+      for (var key in keys) {
+        print(value[key]['destination1Ob']);
+        setState(() {
+          Routerr routerr = new Routerr(
+              value[key]['destination1Ob']['stationName'],
+              value[key]['destination2Ob']['stationName'],
+              value[key]['routeNumber']);
+
+          route.add(routerr);
+        });
+      }
+    });
+  }
+
   saveUserData(Map<String, dynamic> data) async {
     _userService.saveUsers(data);
     print("fuck");
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    readDataforReservations();
   }
 
   register() async {
@@ -56,9 +89,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
         "phone": _phone.text,
         "image": '',
         "type": type == true ? "user" : "bus owner",
-        "route": _route.text,
-         'dest1': _dest1.text,
-        'dest2': _dest2.text,
+        "route": _dropDownValue,
+        'dest1': dest1,
+        'dest2': dest2,
         "number": _number.text,
       };
       type ? saveUserData(data) : saveUserData(databus);
@@ -155,20 +188,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
             SizedBox(height: 32),
             type == false
                 ? LabelTextField(
-                    keyboardType: TextInputType.number,
-                    hintText: "Bus Route",
-                    textEditingController: _route,
-                    validator: (v) {
-                      if (v.isEmpty) {
-                        return 'Route is required';
-                      }
-                      return null;
-                    },
-                  )
-                : SizedBox(),
-            SizedBox(height: 32),
-            type == false
-                ? LabelTextField(
                     keyboardType: TextInputType.text,
                     hintText: "Number plate",
                     textEditingController: _number,
@@ -182,30 +201,44 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 : SizedBox(),
             SizedBox(height: 32),
             type == false
-                ? LabelTextField(
-                    keyboardType: TextInputType.text,
-                    hintText: "Destination 1",
-                    textEditingController: _dest1,
-                    validator: (v) {
-                      if (v.isEmpty) {
-                        return 'Destination 1 is required';
-                      }
-                      return null;
-                    },
-                  )
-                : SizedBox(),
-            SizedBox(height: 32),
-            type == false
-                ? LabelTextField(
-                    keyboardType: TextInputType.text,
-                    hintText: "Destinations 2",
-                    textEditingController: _dest2,
-                    validator: (v) {
-                      if (v.isEmpty) {
-                        return 'Destination 2 is required';
-                      }
-                      return null;
-                    },
+                ? Container(
+                    width: MediaQuery.of(context).size.width,
+                    child: DropdownButton(
+                      hint: _dropDownValue == null
+                          ? Text('Route')
+                          : Text(
+                              _dropDownValue,
+                              style: TextStyle(color: Colors.blue),
+                            ),
+                      isExpanded: true,
+                      iconSize: 30.0,
+                      style: TextStyle(color: Colors.blue),
+                      items: route.map(
+                        (val) {
+                          return DropdownMenuItem<String>(
+                            value: val.route,
+                            child: Text(val.route),
+                          );
+                        },
+                      ).toList(),
+                      onChanged: (val) {
+                        setState(
+                          () {
+                            _dropDownValue = val;
+                            print(val);
+
+                            for (var route1 in route) {
+                              if (route1.route == val) {
+                                setState(() {
+                                  dest1 = route1.destination1;
+                                  dest2 = route1.destination2;
+                                });
+                              }
+                            }
+                          },
+                        );
+                      },
+                    ),
                   )
                 : SizedBox(),
             SizedBox(height: 32),

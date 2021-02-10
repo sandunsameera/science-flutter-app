@@ -209,9 +209,7 @@ class _ReserveSeatsState extends State<ReserveSeats> {
           style: TextStyle(color: Colors.white),
         ),
         onPressed: () {
-          initialTime != null
-              ? writeData()
-              : Toast.show("Please choose a Time", context);
+              writeData();
         },
       ),
     );
